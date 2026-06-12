@@ -1,6 +1,6 @@
 name: Build RE-SS-01 SPI ImmortalWrt
 on:
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,11 +14,11 @@ jobs:
           sudo apt update && sudo apt install -y build-essential flex bison gawk gcc-multilib g++-multilib \
           gettext libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev file wget
 
-      - name: 拉取源码并切换分支
+      - name: 拉取源码（直接用main分支，包含Qualcommax NSS支持）
         run: |
           git clone https://github.com/VIKINGYFY/immortalwrt.git openwrt
           cd openwrt
-          git checkout qualcommax-6.6
+          # 直接使用默认的main分支，无需额外checkout
           cd ..
 
       - name: 导入配置和自定义文件
