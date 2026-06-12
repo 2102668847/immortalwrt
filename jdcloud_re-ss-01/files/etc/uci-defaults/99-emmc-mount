@@ -1,0 +1,8 @@
+#!/bin/sh
+chmod +x /etc/fstab
+if ! grep -q "/dev/mmcblk0" /etc/fstab; then
+    echo "/dev/mmcblk0 /mnt ext4 defaults 0 0" >> /etc/fstab
+    mkfs.ext4 /dev/mmcblk0 -F 2>/dev/null
+fi
+mount -a
+exit 0
