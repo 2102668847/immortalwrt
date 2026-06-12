@@ -1,0 +1,50 @@
+name: Build RE-SS-01 SPI ImmortalWrt
+on:
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装编译依赖
+        run: |
+          sudo apt update && sudo apt install -y build-essential flex bison gawk gcc-multilib g++-multilib \
+          gettext libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev file wget
+
+      - name: 拉取源码并切换分支
+        run: |
+          git clone https://github.com/VIKINGYFY/immortalwrt.git openwrt
+          cd openwrt
+          git checkout qualcommax-6.6
+          cd ..
+
+      - name: 导入配置和自定义文件
+        run: |
+          cp ./jdcloud_re-ss-01/.config ./openwrt/.config
+          [ -d ./jdcloud_re-ss-01/files ] && cp -r ./jdcloud_re-ss-01/files/* ./openwrt/
+
+      - name: 更新 feeds
+        run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+          make defconfig
+
+      - name: 预下载依赖包
+        run: |
+          cd openwrt
+          make download -j8 V=s
+
+      - name: 编译固件
+        run: |
+          cd openwrt
+          make -j$(nproc) V=s
+
+      - name: 上传固件成品
+        uses: actions/upload-artifact@v4
+        with:
+          name: RE-SS-01-SPI-Firmware
+          path: openwrt/bin/targets/qualcommax/ipq60xx/*.bin
